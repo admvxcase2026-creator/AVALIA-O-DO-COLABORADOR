@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Avaliação do colaborador</title>
+<link id="fav" rel="icon" href="">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{--bg:#EFEFEF;--card:#FFF;--ink:#111;--sub:#6A6A6A;--line:#DCDCDC;--soft:#F5F5F5;--mid:#9A9A9A;color-scheme:light}
+[data-theme=dark]{--bg:#0C0C0C;--card:#161616;--ink:#F2F2F2;--sub:#9B9B9B;--line:#2B2B2B;--soft:#1E1E1E;--mid:#6C6C6C;color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.4 Inter,system-ui,-apple-system,Segoe UI,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.bar{display:flex;align-items:center;gap:12px;background:var(--card);border-bottom:1px solid var(--line);padding:12px 22px;position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.bar h1{font-size:16px;font-weight:800;letter-spacing:-.01em}
+.bar .sp{flex:1}
+.logo{width:30px;height:30px;flex:none}
+.btn{border:1.5px solid var(--ink);border-radius:9px;padding:8px 14px;font-weight:700;font-size:13px;background:var(--card);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+.btn:hover{background:var(--soft)}
+.btn.p{background:var(--ink);color:var(--card)}
+.btn.p:hover{opacity:.88}
+.btn.g{border-color:var(--line);color:var(--sub);font-weight:600}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.ck:focus-visible,.ib:focus-visible,.chip:focus-visible,.hist button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.pill{border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:600;color:var(--sub);white-space:nowrap}
+.wrap{display:grid;grid-template-columns:1fr 300px;gap:18px;padding:18px 22px;max-width:1180px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.sheet{padding:26px 30px}
+.row2{display:flex;gap:14px;margin-bottom:18px}
+.row2>div:first-child{flex:1}
+.row2>div:last-child{width:190px}
+.lb{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.04em;margin:0 0 5px;display:flex;align-items:center;justify-content:space-between}
+.in,select.in,input.in{width:100%;border:1.5px solid var(--ink);border-radius:9px;padding:9px 12px;background:var(--card);font-weight:600;min-height:40px}
+.in:focus{outline:2px solid var(--ink);outline-offset:1px}
+textarea.ta{width:100%;border:1.5px solid var(--ink);border-radius:10px;padding:12px;background:var(--card);min-height:170px;line-height:1.55;resize:vertical}
+textarea.ta:focus{outline:2px solid var(--ink);outline-offset:1px}
+.notes{background:var(--soft);border-radius:10px;padding:2px 14px;margin-bottom:18px}
+.note{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.note:last-child{border:0}
+.note .d{font-weight:800;font-size:12px;min-width:46px;padding-top:2px}
+.note p{flex:1;white-space:pre-wrap;word-break:break-word}
+.note.done p{color:var(--mid);text-decoration:line-through}
+.note .old{font-size:11px;color:var(--sub);font-weight:600;display:block}
+.ck{width:20px;height:20px;border:2px solid var(--ink);border-radius:5px;display:inline-grid;place-items:center;flex:none;font-size:13px;font-weight:900;background:transparent;color:var(--card);margin-top:1px;padding:0;line-height:1}
+.ck.on{background:var(--ink)}
+.ib{border:0;background:transparent;color:var(--sub);font-size:14px;padding:2px 5px;border-radius:6px;opacity:.55}
+.note:hover .ib,.ib:focus-visible{opacity:1}
+.ib:hover{background:var(--line)}
+.empty{color:var(--sub);padding:14px 0;font-size:13px}
+.addline{display:flex;gap:8px;margin:-8px 0 18px}
+.addline .in{min-height:38px;font-weight:500}
+.addline input[type=date]{width:150px;flex:none}
+h3{font-size:13px;font-weight:800;letter-spacing:.01em;margin-bottom:10px}
+.rail{display:flex;flex-direction:column;gap:12px;align-content:start}
+.acts{display:flex;flex-direction:column;gap:8px}
+.bartrack{height:8px;border-radius:9px;background:var(--soft);overflow:hidden;border:1px solid var(--line)}
+.bartrack i{display:block;height:100%;background:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip{border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:600;background:var(--card);color:var(--sub)}
+.chip:hover{border-color:var(--ink);color:var(--ink)}
+.hist{display:flex;flex-direction:column}
+.hist button{text-align:left;border:0;background:transparent;padding:6px 8px;margin:0 -8px;border-radius:7px;color:var(--sub);font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.hist button:hover{background:var(--soft);color:var(--ink)}
+.hist button.on{color:var(--ink);background:var(--soft)}
+.hist small{font-weight:500}
+.msg{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--card);padding:10px 18px;border-radius:10px;font-weight:600;z-index:30;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s}
+.msg.on{opacity:1}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);padding:22px;width:min(520px,94vw);margin:auto}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+dialog h2{font-size:16px;font-weight:800;margin-bottom:14px}
+dialog .fld{margin-bottom:12px}
+dialog .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.crow{display:grid;grid-template-columns:1fr 150px auto;gap:8px;align-items:center;margin-bottom:8px}
+.crow .in{min-height:36px;font-weight:500}
+.crow.off .in{opacity:.5}
+.hint{color:var(--sub);font-size:12px;margin-top:6px}
+.save-st{font-size:12px;color:var(--sub);font-weight:600}
+@media(max-width:860px){.wrap{grid-template-columns:1fr;padding:14px 16px}.sheet{padding:18px}.row2{flex-direction:column}.row2>div:last-child{width:100%}.bar{padding:10px 16px}.crow{grid-template-columns:1fr 1fr auto}.crow .nm{grid-column:1/-1}.addline{flex-wrap:wrap}.addline input[type=date]{width:100%}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--ink)"/><path d="M8 9.5h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8.5L11 26v-4.5H8a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z" fill="var(--card)"/><path d="M11.5 15.6l3 3 6-6" fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <h1>Avaliação do colaborador</h1>
+  <span class="pill" id="mesPill"></span>
+  <span class="sp"></span>
+  <button class="btn g" id="bCols">Colaboradores</button>
+  <button class="btn g" id="bCfg">WhatsApp</button>
+  <button class="btn g" id="bTema" title="Alternar tema">Tema</button>
+  <button class="btn p" id="bSit">+ Anotar situação</button>
+</div>
+
+<div class="wrap">
+  <main class="card sheet">
+    <div class="row2">
+      <div><div class="lb"><label for="selCol">Colaborador</label></div><select class="in" id="selCol"></select></div>
+      <div><div class="lb"><label for="dtFb">Data do feedback</label></div><input class="in" type="date" id="dtFb"></div>
+    </div>
+    <div class="lb"><span>Situações do mês</span><span class="save-st" id="sitCnt"></span></div>
+    <div class="notes" id="notes"></div>
+    <div class="addline">
+      <input class="in" type="date" id="qDt" aria-label="Data da situação">
+      <input class="in" type="text" id="qTx" placeholder="Anotar nova situação deste colaborador" aria-label="Nova situação">
+      <button class="btn" id="qAdd">Adicionar</button>
+    </div>
+    <div class="lb"><label for="obs">Observações da conversa</label><span class="save-st" id="obsSt"></span></div>
+    <textarea class="ta" id="obs" placeholder="O que foi conversado neste feedback"></textarea>
+  </main>
+
+  <aside class="rail">
+    <div class="card"><h3>Ações</h3>
+      <div class="acts">
+        <button class="btn p" id="bSave">Salvar avaliação</button>
+        <button class="btn" id="bPdf">Gerar PDF</button>
+        <button class="btn" id="bWpp">Enviar no WhatsApp</button>
+        <button class="btn g" id="bNova" style="display:none">Nova avaliação</button>
+      </div>
+      <div class="hint" id="envSt"></div>
+    </div>
+    <div class="card"><h3 id="prgT"></h3>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--sub)">Feedbacks feitos</span><b id="prgN"></b></div>
+      <div class="bartrack"><i id="prgB" style="width:0"></i></div>
+      <div class="chips" id="falt"></div>
+    </div>
+    <div class="card"><h3 id="hisT">Histórico</h3><div class="hist" id="hist"></div><button class="btn g" id="bAnot" style="width:100%;margin-top:10px">Ver todas as anotações</button></div>
+  </aside>
+</div>
+
+<dialog id="dlg"></dialog>
+<div class="msg" id="msg" role="status"></div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const SUPABASE_URL='https://llfiwklxinautxoujpre.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZml3a2x4aW5hdXR4b3VqcHJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MDUzNTAsImV4cCI6MjEwNDQ4MTM1MH0.3dLtdv0Hvf93jXQHy2mjOTr4BJoCMHF_MzwUVEI5o38';
+// Proxy do WhatsApp (Google Apps Script /exec). Pode ser colado aqui ou no botão "WhatsApp" do sistema.
+const WPP_URL_PADRAO='';
+const WPP_TOKEN_PADRAO='';
+const sb=createClient(SUPABASE_URL,SUPABASE_ANON);
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const hoje=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const br=ymd=>ymd?ymd.slice(8,10)+'/'+ymd.slice(5,7)+'/'+ymd.slice(0,4):'';
+const br2=ymd=>ymd?ymd.slice(8,10)+'/'+ymd.slice(5,7):'';
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const mesNome=ym=>MESES[+ym.slice(5,7)-1]+' '+ym.slice(0,4);
+const slug=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+
+const S={cols:[],sits:[],fbs:[],rasc:{},cur:ls.get('av-cur')||'',data:hoje(),fb:null,vendo:false};
+
+/* ---------- tema + favicon ---------- */
+function favicon(){
+  const cs=getComputedStyle(document.documentElement);
+  const ink=cs.getPropertyValue('--ink').trim(),card=cs.getPropertyValue('--card').trim();
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="${ink}"/><path d="M8 9.5h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8.5L11 26v-4.5H8a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z" fill="${card}"/><path d="M11.5 15.6l3 3 6-6" fill="none" stroke="${ink}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  $('fav').href='data:image/svg+xml,'+encodeURIComponent(svg);
+}
+function tema(t){document.documentElement.dataset.theme=t;ls.set('av-tema',t);favicon()}
+tema(ls.get('av-tema')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+$('bTema').onclick=()=>tema(document.documentElement.dataset.theme==='dark'?'light':'dark');
+
+/* ---------- util ---------- */
+let tmsg;
+function aviso(t){const m=$('msg');m.textContent=t;m.classList.add('on');clearTimeout(tmsg);tmsg=setTimeout(()=>m.classList.remove('on'),2800)}
+const ativos=()=>S.cols.filter(c=>c.ativo).sort((a,b)=>a.nome.localeCompare(b.nome,'pt'));
+const colAtual=()=>S.cols.find(c=>c.id===S.cur);
+function erro(e){console.error(e);aviso('Erro: '+(e.message||e))}
+
+async function carrega(){
+  const [a,b,c,d]=await Promise.all([
+    sb.from('av_colaboradores').select('*').order('nome'),
+    sb.from('av_situacoes').select('*').order('data'),
+    sb.from('av_feedbacks').select('*').order('data',{ascending:false}),
+    sb.from('av_rascunhos').select('*')
+  ]);
+  const er=a.error||b.error||c.error||d.error;
+  if(er){erro(er);if(/relation|does not exist|schema cache/i.test(er.message))aviso('Rode o av-setup.sql no Supabase antes de usar');return}
+  S.cols=a.data;S.sits=b.data;S.fbs=c.data;S.rasc={};d.data.forEach(r=>S.rasc[r.colaborador_id]=r);
+}
+
+/* ---------- seleção e carregamento do feedback ---------- */
+const kR=()=>'av-rasc:'+S.cur;
+const kV=()=>'av-rasc-fb:'+(S.fb?S.fb.id:'');
+function rd(k){try{return JSON.parse(ls.get(k)||'null')}catch(e){return null}}
+function carregaFb(){
+  S.fb=S.vendo?(S.fbs.find(f=>f.colaborador_id===S.cur&&f.data===S.data)||null):null;
+  if(S.vendo&&!S.fb)S.vendo=false;
+  let txt='',st='';
+  if(S.vendo){
+    const l=rd(kV());
+    if(l&&l.v!==S.fb.observacoes){txt=l.v;st='Alterações não salvas'}else{txt=S.fb.observacoes||'';st='Salvo'}
+  }else if(S.cur){
+    const l=rd(kR()),d=S.rasc[S.cur];
+    const tl=l?l.t:0,td=d?new Date(d.atualizado_em).getTime():0;
+    if(l&&tl>=td){txt=l.v}else if(d){txt=d.observacoes||''}
+    if(txt)st='Rascunho recuperado';
+  }
+  $('obs').value=txt;$('obsSt').textContent=st;
+}
+let pend=null,tR;
+async function rascDb(p){
+  if(!p)return;
+  if(!p.v.trim()){await sb.from('av_rascunhos').delete().eq('colaborador_id',p.col);delete S.rasc[p.col];return}
+  const reg={colaborador_id:p.col,observacoes:p.v,atualizado_em:new Date(p.t).toISOString()};
+  const {error}=await sb.from('av_rascunhos').upsert(reg,{onConflict:'colaborador_id'});
+  if(!error){S.rasc[p.col]=reg;if(S.cur===p.col&&!S.vendo)$('obsSt').textContent='Rascunho guardado'}
+}
+function flushRasc(){clearTimeout(tR);const p=pend;pend=null;return rascDb(p)}
+function selecionaCol(id){
+  flushRasc();
+  S.cur=id;S.vendo=false;ls.set('av-cur',id);
+  $('selCol').value=id;
+  carregaFb();desenha();
+}
+
+/* ---------- desenho ---------- */
+function situacoesVisiveis(){
+  if(!S.cur)return[];
+  return S.sits.filter(s=>s.colaborador_id===S.cur&&!s.apagada&&(!s.feedback_id||(S.vendo&&S.fb&&s.feedback_id===S.fb.id)))
+    .sort((a,b)=>a.data.localeCompare(b.data));
+}
+function desenha(){
+  const ym=S.data.slice(0,7);
+  $('mesPill').textContent=mesNome(ym);
+  // select
+  const sel=$('selCol');
+  const lista=ativos();
+  sel.innerHTML=(S.cur?'':'<option value="">Escolha o colaborador</option>')+lista.map(c=>`<option value="${c.id}">${esc(c.nome)}</option>`).join('');
+  if(S.cur&&!lista.find(c=>c.id===S.cur)){const c=colAtual();if(c)sel.insertAdjacentHTML('beforeend',`<option value="${c.id}">${esc(c.nome)} (inativo)</option>`)}
+  sel.value=S.cur||'';
+  // situações
+  const vis=situacoesVisiveis();
+  const pend=vis.filter(s=>!s.comunicada).length;
+  $('sitCnt').textContent=S.cur?(pend?pend+' para comunicar':(vis.length?'tudo comunicado':'')):'';
+  if(!S.cur){$('notes').innerHTML='<div class="empty">Escolha um colaborador para ver as situações anotadas.</div>'}
+  else if(!vis.length){$('notes').innerHTML='<div class="empty">Nenhuma situação anotada. Use o campo abaixo para anotar o que acontecer durante o mês.</div>'}
+  else $('notes').innerHTML=vis.map(s=>`<div class="note ${s.comunicada?'done':''}" data-id="${s.id}">
+    <span class="d">${br2(s.data)}</span>
+    <p>${esc(s.texto)}${s.data.slice(0,7)!==ym?`<span class="old">de ${mesNome(s.data.slice(0,7))}, ainda não comunicada</span>`:''}</p>
+    <button class="ib" data-a="ed" title="Editar" aria-label="Editar situação">✎</button>
+    <button class="ib" data-a="rm" title="Excluir" aria-label="Excluir situação">✕</button>
+    <button class="ck ${s.comunicada?'on':''}" data-a="ck" role="checkbox" aria-checked="${!!s.comunicada}" aria-label="Já comunicada">${s.comunicada?'✓':''}</button>
+  </div>`).join('');
+  // progresso
+  const feitos=new Set(S.fbs.filter(f=>f.data.slice(0,7)===ym).map(f=>f.colaborador_id));
+  const feitosAt=lista.filter(c=>feitos.has(c.id));
+  const faltam=lista.filter(c=>!feitos.has(c.id));
+  $('prgT').textContent=mesNome(ym).split(' ')[0].toUpperCase();
+  $('prgN').textContent=feitosAt.length+' de '+lista.length;
+  $('prgB').style.width=(lista.length?Math.round(feitosAt.length/lista.length*100):0)+'%';
+  $('falt').innerHTML=faltam.length?faltam.map(c=>`<button class="chip" data-id="${c.id}">${esc(c.nome.split(' ')[0])}</button>`).join(''):(lista.length?'<span style="color:var(--sub);font-size:13px">Todos os feedbacks do mês feitos.</span>':'<span style="color:var(--sub);font-size:13px">Cadastre os colaboradores no botão acima.</span>');
+  // histórico
+  const c=colAtual();
+  $('hisT').textContent=c?('HISTÓRICO: '+c.nome.split(' ')[0].toUpperCase()):'HISTÓRICO';
+  const hs=S.fbs.filter(f=>f.colaborador_id===S.cur);
+  $('hist').innerHTML=hs.length?hs.map(f=>`<button data-d="${f.data}" class="${S.vendo&&f.data===S.data?'on':''}"><span>${br(f.data)}</span><small>${f.enviado_em?'enviado':''}</small></button>`).join(''):'<div class="empty" style="padding:0">Nenhum feedback salvo ainda.</div>';
+  // estado dos botões
+  const ok=!!S.cur;
+  ['bSave','bPdf','bWpp'].forEach(i=>$(i).disabled=!ok);
+  $('bNova').style.display=S.vendo?'':'none';
+  $('envSt').textContent=S.fb&&S.fb.enviado_em?'Enviado no WhatsApp em '+new Date(S.fb.enviado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'';
+}
+
+/* ---------- eventos da folha ---------- */
+$('selCol').onchange=e=>selecionaCol(e.target.value);
+$('dtFb').onchange=e=>{if(!e.target.value)return;flushRasc();S.data=e.target.value;S.vendo=false;carregaFb();desenha()};
+$('falt').onclick=e=>{const b=e.target.closest('.chip');if(b)selecionaCol(b.dataset.id)};
+$('hist').onclick=e=>{const b=e.target.closest('button');if(!b)return;flushRasc();S.data=b.dataset.d;S.vendo=true;$('dtFb').value=S.data;carregaFb();desenha()};
+$('bNova').onclick=()=>{S.vendo=false;S.data=hoje();$('dtFb').value=S.data;carregaFb();desenha()};
+$('obs').oninput=()=>{
+  const v=$('obs').value,now=Date.now();
+  if(S.vendo){ls.set(kV(),JSON.stringify({v,t:now}));$('obsSt').textContent='Alterações não salvas';return}
+  ls.set(kR(),JSON.stringify({v,t:now}));$('obsSt').textContent='Guardando...';
+  pend={col:S.cur,v,t:now};clearTimeout(tR);tR=setTimeout(flushRasc,700);
+};
+document.addEventListener('visibilitychange',()=>{if(document.hidden)flushRasc()});
+addEventListener('pagehide',()=>{flushRasc()});
+
+$('notes').onclick=async e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const row=b.closest('.note');const s=S.sits.find(x=>x.id===row.dataset.id);if(!s)return;
+  if(b.dataset.a==='ck'){
+    const novo=!s.comunicada;
+    const upd={comunicada:novo,comunicada_em:novo?S.data:null};
+    const {error}=await sb.from('av_situacoes').update(upd).eq('id',s.id);
+    if(error)return erro(error);
+    Object.assign(s,upd);desenha();
+  }else if(b.dataset.a==='ed')dlgSit(s);
+  else if(b.dataset.a==='rm'){
+    if(!confirm('Apagar esta anotação? Ela continua no histórico de anotações.'))return;
+    const {error}=await sb.from('av_situacoes').update({apagada:true}).eq('id',s.id);
+    if(error)return erro(error);
+    s.apagada=true;desenha();
+  }
+};
+
+async function addSit(colId,data,texto){
+  const {data:r,error}=await sb.from('av_situacoes').insert({colaborador_id:colId,data,texto}).select().single();
+  if(error)return erro(error),null;
+  S.sits.push(r);return r;
+}
+$('qAdd').onclick=async()=>{
+  if(!S.cur)return aviso('Escolha o colaborador primeiro');
+  const t=$('qTx').value.trim();if(!t)return aviso('Escreva a situação');
+  const r=await addSit(S.cur,$('qDt').value||hoje(),t);
+  if(r){$('qTx').value='';desenha();aviso('Situação anotada')}
+};
+$('qTx').onkeydown=e=>{if(e.key==='Enter')$('qAdd').click()};
+
+/* ---------- salvar avaliação ---------- */
+function discutidas(){return situacoesVisiveis().filter(s=>s.comunicada)}
+async function salvar(silencioso){
+  if(!S.cur){aviso('Escolha o colaborador');return false}
+  await flushRasc();
+  const vis=situacoesVisiveis();
+  const disc=vis.filter(s=>s.comunicada);
+  let obs=$('obs').value.trim();
+  let sit=disc.map(s=>({data:s.data,texto:s.texto}));
+  const ex=S.fbs.find(f=>f.colaborador_id===S.cur&&f.data===S.data);
+  if(ex&&!S.vendo){obs=[ex.observacoes,obs].filter(Boolean).join('\n\n');sit=[...(ex.situacoes||[]),...sit]}
+  const reg={colaborador_id:S.cur,data:S.data,observacoes:obs,situacoes:sit};
+  const {data:r,error}=await sb.from('av_feedbacks').upsert(reg,{onConflict:'colaborador_id,data'}).select().single();
+  if(error){erro(error);return false}
+  const i=S.fbs.findIndex(f=>f.id===r.id);
+  if(i>=0)S.fbs[i]=r;else S.fbs.push(r);
+  S.fbs.sort((a,b)=>b.data.localeCompare(a.data));
+  // anotações comunicadas saem da página inicial e ficam ligadas a esta avaliação
+  const ligar=disc.filter(s=>s.feedback_id!==r.id),soltar=vis.filter(s=>!s.comunicada&&s.feedback_id===r.id);
+  if(ligar.length){const {error:e1}=await sb.from('av_situacoes').update({feedback_id:r.id}).in('id',ligar.map(s=>s.id));if(e1)return erro(e1),false;ligar.forEach(s=>s.feedback_id=r.id)}
+  if(soltar.length){const {error:e2}=await sb.from('av_situacoes').update({feedback_id:null}).in('id',soltar.map(s=>s.id));if(e2)return erro(e2),false;soltar.forEach(s=>s.feedback_id=null)}
+  if(!S.vendo){ls.del(kR());delete S.rasc[S.cur];await sb.from('av_rascunhos').delete().eq('colaborador_id',S.cur)}
+  S.fb=r;S.vendo=true;ls.del(kV());
+  $('obs').value=obs;$('obsSt').textContent='Salvo';
+  desenha();
+  if(!silencioso)aviso('Avaliação salva');
+  return true;
+}
+$('bSave').onclick=()=>salvar();
+
+/* ---------- PDF ---------- */
+function semEmoji(s){return String(s).replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}]/gu,'')}
+function montaPdf(){
+  const c=colAtual();if(!c)return null;
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const W=210,M=18;let y=20;
+  doc.setFillColor(17,17,17);doc.roundedRect(M,y-6,10,10,2.5,2.5,'F');
+  doc.setFillColor(255,255,255);doc.roundedRect(M+2,y-4,6,4.6,0.8,0.8,'F');
+  doc.setDrawColor(17,17,17);doc.setLineWidth(.5);doc.lines([[1,1],[1.6,-1.6]],M+3.4,y-1.6);
+  doc.setTextColor(17,17,17);doc.setFont('helvetica','bold');doc.setFontSize(18);
+  doc.text('Avaliação do colaborador',M+14,y+1.5);
+  y+=13;doc.setDrawColor(17,17,17);doc.setLineWidth(.6);doc.line(M,y,W-M,y);y+=9;
+  doc.setFontSize(9);doc.setTextColor(106,106,106);doc.text('COLABORADOR',M,y);doc.text('DATA DO FEEDBACK',M+110,y);
+  y+=6;doc.setFontSize(13);doc.setTextColor(17,17,17);doc.text(semEmoji(c.nome),M,y);doc.text(br(S.data),M+110,y);
+  y+=12;
+  doc.setFontSize(9);doc.setTextColor(106,106,106);doc.text('SITUAÇÕES CONVERSADAS',M,y);y+=3;
+  const sit=discutidas();
+  if(sit.length){
+    doc.autoTable({startY:y,margin:{left:M,right:M},head:[['Data','Situação']],body:sit.map(s=>[br(s.data),semEmoji(s.texto)]),
+      styles:{font:'helvetica',fontSize:10,cellPadding:3,textColor:[17,17,17],lineColor:[220,220,220],lineWidth:.2},
+      headStyles:{fillColor:[17,17,17],textColor:[255,255,255],fontStyle:'bold'},
+      alternateRowStyles:{fillColor:[245,245,245]},columnStyles:{0:{cellWidth:26}}});
+    y=doc.lastAutoTable.finalY+10;
+  }else{y+=6;doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(106,106,106);doc.text('Nenhuma situação marcada como comunicada.',M,y);y+=10}
+  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(106,106,106);
+  if(y>250){doc.addPage();y=22}
+  doc.text('OBSERVAÇÕES DA CONVERSA',M,y);y+=6;
+  doc.setFont('helvetica','normal');doc.setFontSize(10.5);doc.setTextColor(17,17,17);
+  const obs=semEmoji($('obs').value.trim()||'Sem observações registradas.');
+  doc.splitTextToSize(obs,W-2*M).forEach(l=>{if(y>270){doc.addPage();y=22}doc.text(l,M,y);y+=5.4});
+  y=Math.max(y+22,250);if(y>275){doc.addPage();y=60}
+  doc.setDrawColor(17,17,17);doc.setLineWidth(.3);
+  doc.line(M,y,M+75,y);doc.line(W-M-75,y,W-M,y);
+  doc.setFontSize(9);doc.setTextColor(106,106,106);
+  doc.text(semEmoji(c.nome),M,y+5);doc.text('Supervisor',W-M-75,y+5);
+  return doc;
+}
+const nomePdf=()=>`avaliacao-${slug(colAtual().nome)}-${S.data}.pdf`;
+function gerarPdf(){const d=montaPdf();if(d)d.save(nomePdf())}
+$('bPdf').onclick=()=>{if(!window.jspdf)return aviso('PDF ainda carregando, tente de novo');gerarPdf()};
+
+/* ---------- WhatsApp ---------- */
+const wUrl=()=>ls.get('av-wurl')||WPP_URL_PADRAO;
+const wTok=()=>ls.get('av-wtok')||WPP_TOKEN_PADRAO;
+function numero(t){
+  t=String(t||'').trim();if(!t)return'';
+  if(t.includes('@'))return t;
+  const d=t.replace(/\D/g,'');
+  return(d.length===10||d.length===11)?'55'+d:d;
+}
+function montaMsg(){
+  const c=colAtual();
+  const sit=discutidas();
+  let m=`*Avaliação do colaborador*\n*${c.nome}* | feedback de ${br(S.data)}\n`;
+  if(sit.length)m+='\n*Situações conversadas:*\n'+sit.map(s=>`• ${br2(s.data)}: ${s.texto}`).join('\n')+'\n';
+  const o=$('obs').value.trim();
+  if(o)m+='\n*Observações:*\n'+o+'\n';
+  return m.trim();
+}
+$('bWpp').onclick=()=>{
+  const c=colAtual();if(!c)return;
+  if(!wUrl())return dlgCfg('Cole primeiro a URL do envio de WhatsApp.');
+  if(!numero(c.telefone))return dlgCols('Informe o WhatsApp de '+c.nome.split(' ')[0]+' para enviar.');
+  dlgWpp();
+};
+function dlgWpp(){
+  const c=colAtual();
+  abre(`<h2>Enviar no WhatsApp</h2>
+  <div class="fld"><div class="lb">Para</div><div class="in" style="font-weight:600">${esc(c.nome)} <span style="color:var(--sub);font-weight:500">${esc(numero(c.telefone))}</span></div></div>
+  <div class="fld"><div class="lb"><label for="wm">Mensagem</label></div><textarea class="ta" id="wm" style="min-height:230px">${esc(montaMsg())}</textarea></div>
+  <label style="display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" id="wPdf" checked> Enviar também o PDF da avaliação</label>
+  <div class="hint">A avaliação é salva antes de enviar.</div>
+  <div class="foot"><button class="btn g" data-x>Cancelar</button><button class="btn p" id="wGo">Enviar</button></div>`);
+  $('wGo').onclick=async()=>{
+    const b=$('wGo');b.disabled=true;b.textContent='Enviando...';
+    try{
+      const ok=await salvar(true);if(!ok)throw new Error('não foi possível salvar a avaliação');
+      const comPdf=$('wPdf').checked;
+      if(comPdf&&!wTok())throw new Error('para enviar o PDF informe o token em WhatsApp');
+      if(comPdf&&!window.jspdf)throw new Error('PDF ainda carregando, tente de novo');
+      const post=async b=>{const r=await fetch(wUrl(),{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(b)});const j=await r.json().catch(()=>({}));if(!r.ok||j.ok===false)throw new Error(j.error||('resposta '+r.status));return j};
+      await post({number:numero(c.telefone),message:$('wm').value});
+      if(comPdf){
+        const b64=montaPdf().output('datauristring').split(',')[1];
+        try{await post({action:'wpp_documento',token:wTok(),number:numero(c.telefone),fileName:nomePdf(),caption:'Avaliação de '+c.nome+' ('+br(S.data)+')',base64:b64})}
+        catch(e){e.message='texto enviado, mas o PDF falhou: '+e.message;throw e}
+      }
+      const t=new Date().toISOString();
+      const {error}=await sb.from('av_feedbacks').update({enviado_em:t}).eq('id',S.fb.id);
+      if(error)throw error;
+      S.fb.enviado_em=t;fecha();desenha();aviso('Enviado para '+c.nome.split(' ')[0]);
+    }catch(e){b.disabled=false;b.textContent='Enviar';erro(e)}
+  };
+}
+function dlgCfg(nota){
+  abre(`<h2>Envio de WhatsApp</h2>
+  ${nota?`<div class="hint" style="margin:-6px 0 12px;color:var(--ink)">${esc(nota)}</div>`:''}
+  <div class="fld"><div class="lb"><label for="cu">URL do Apps Script (termina em /exec)</label></div><input class="in" id="cu" value="${esc(wUrl())}" placeholder="https://script.google.com/macros/s/.../exec"></div>
+  <div class="fld"><div class="lb"><label for="ct">Token (o mesmo FM_TOKEN do Apps Script, usado no envio do PDF)</label></div><input class="in" id="ct" value="${esc(wTok())}"></div>
+  <div class="hint">Fica salvo só neste navegador. A chave da Evolution continua apenas dentro do Apps Script.</div>
+  <div class="foot"><button class="btn g" data-x>Fechar</button><button class="btn p" id="cOk">Salvar</button></div>`);
+  $('cOk').onclick=()=>{ls.set('av-wurl',$('cu').value.trim());ls.set('av-wtok',$('ct').value.trim());fecha();aviso('Configuração salva')};
+}
+$('bCfg').onclick=()=>dlgCfg();
+
+/* ---------- diálogos ---------- */
+const dlg=$('dlg');
+function abre(h){dlg.innerHTML=h;if(!dlg.open)dlg.showModal()}
+function fecha(){if(dlg.open)dlg.close()}
+dlg.addEventListener('click',e=>{if(e.target===dlg||e.target.closest('[data-x]'))fecha()});
+
+function dlgSit(s){
+  const ed=!!s;
+  const opts=ativos().map(c=>`<option value="${c.id}" ${(ed?s.colaborador_id:S.cur)===c.id?'selected':''}>${esc(c.nome)}</option>`).join('');
+  abre(`<h2>${ed?'Editar situação':'Anotar situação'}</h2>
+  <div class="fld"><div class="lb"><label for="sc">Colaborador</label></div><select class="in" id="sc">${ed?opts:'<option value="">Escolha</option>'+opts}</select></div>
+  <div class="fld"><div class="lb"><label for="sd">Data</label></div><input class="in" type="date" id="sd" value="${ed?s.data:hoje()}"></div>
+  <div class="fld"><div class="lb"><label for="st">O que aconteceu</label></div><textarea class="ta" id="st" style="min-height:110px">${ed?esc(s.texto):''}</textarea></div>
+  <div class="foot"><button class="btn g" data-x>Cancelar</button><button class="btn p" id="sOk">Salvar</button></div>`);
+  setTimeout(()=>$('st').focus(),30);
+  $('sOk').onclick=async()=>{
+    const col=$('sc').value,d=$('sd').value,t=$('st').value.trim();
+    if(!col)return aviso('Escolha o colaborador');if(!d||!t)return aviso('Preencha data e texto');
+    if(ed){
+      const {error}=await sb.from('av_situacoes').update({colaborador_id:col,data:d,texto:t}).eq('id',s.id);
+      if(error)return erro(error);Object.assign(s,{colaborador_id:col,data:d,texto:t});
+    }else if(!await addSit(col,d,t))return;
+    fecha();if(col!==S.cur)selecionaCol(col);else desenha();aviso('Situação salva');
+  };
+}
+$('bSit').onclick=()=>dlgSit();
+
+function dlgCols(nota){
+  const lin=c=>`<div class="crow ${c.ativo?'':'off'}" data-id="${c.id}"><input class="in nm" value="${esc(c.nome)}" aria-label="Nome"><input class="in" value="${esc(c.telefone||'')}" placeholder="WhatsApp com DDD" inputmode="tel" aria-label="WhatsApp"><button class="btn g" data-a="at">${c.ativo?'Inativar':'Reativar'}</button></div>`;
+  abre(`<h2>Colaboradores</h2>
+  ${nota?`<div class="hint" style="margin:-6px 0 12px;color:var(--ink)">${esc(nota)}</div>`:''}
+  <div id="cl">${S.cols.map(lin).join('')||'<div class="empty">Nenhum colaborador cadastrado.</div>'}</div>
+  <div class="crow" style="margin-top:12px"><input class="in nm" id="nn" placeholder="Nome do novo colaborador"><input class="in" id="nt" placeholder="WhatsApp com DDD" inputmode="tel"><button class="btn" id="nAdd">Adicionar</button></div>
+  <div class="hint">Número: DDD + telefone (ex.: 71999998888). Também aceita ID de grupo terminado em @g.us. Inativar mantém o histórico.</div>
+  <div class="foot"><button class="btn p" data-x>Concluir</button></div>`);
+  $('cl').onchange=async e=>{
+    const row=e.target.closest('.crow');if(!row)return;const c=S.cols.find(x=>x.id===row.dataset.id);
+    const [n,t]=row.querySelectorAll('input');
+    const upd={nome:n.value.trim()||c.nome,telefone:t.value.trim()};
+    const {error}=await sb.from('av_colaboradores').update(upd).eq('id',c.id);
+    if(error)return erro(error);Object.assign(c,upd);desenha();
+  };
+  $('cl').onclick=async e=>{
+    const b=e.target.closest('[data-a=at]');if(!b)return;
+    const c=S.cols.find(x=>x.id===b.closest('.crow').dataset.id);
+    const {error}=await sb.from('av_colaboradores').update({ativo:!c.ativo}).eq('id',c.id);
+    if(error)return erro(error);c.ativo=!c.ativo;dlgCols(nota);desenha();
+  };
+  $('nAdd').onclick=async()=>{
+    const n=$('nn').value.trim();if(!n)return aviso('Informe o nome');
+    const {data,error}=await sb.from('av_colaboradores').insert({nome:n,telefone:$('nt').value.trim(),ativo:true}).select().single();
+    if(error)return erro(error);S.cols.push(data);
+    if(!S.cur)S.cur=data.id;
+    dlgCols(nota);desenha();
+  };
+}
+$('bCols').onclick=()=>dlgCols();
+
+function dlgAnot(){
+  const c=colAtual();if(!c)return aviso('Escolha o colaborador');
+  const lista=S.sits.filter(s=>s.colaborador_id===c.id).sort((a,b)=>b.data.localeCompare(a.data));
+  const st=s=>s.apagada?'Apagada':(s.feedback_id?('Comunicada na avaliação de '+br((S.fbs.find(f=>f.id===s.feedback_id)||{}).data||s.comunicada_em)):(s.comunicada?'Marcada como comunicada':'Pendente'));
+  abre(`<h2>Anotações de ${esc(c.nome)}</h2>
+  <div class="notes" style="max-height:60vh;overflow:auto">${lista.length?lista.map(s=>`<div class="note ${s.apagada?'done':''}" data-id="${s.id}"><span class="d">${br(s.data)}</span><p>${esc(s.texto)}<span class="old">${esc(st(s))}</span></p>${s.apagada?'<button class="btn g" data-r style="padding:4px 10px">Restaurar</button>':''}</div>`).join(''):'<div class="empty">Nenhuma anotação ainda.</div>'}</div>
+  <div class="foot"><button class="btn p" data-x>Fechar</button></div>`);
+  dlg.querySelector('.notes').onclick=async e=>{
+    const b=e.target.closest('[data-r]');if(!b)return;
+    const s=S.sits.find(x=>x.id===b.closest('.note').dataset.id);
+    const {error}=await sb.from('av_situacoes').update({apagada:false}).eq('id',s.id);
+    if(error)return erro(error);s.apagada=false;dlgAnot();desenha();
+  };
+}
+$('bAnot').onclick=dlgAnot;
+
+/* ---------- início ---------- */
+$('dtFb').value=S.data;$('qDt').value=hoje();
+desenha();
+await carregaTudo();
+async function carregaTudo(){
+  await carrega();
+  if(!S.cols.find(c=>c.id===S.cur&&c.ativo))S.cur='';
+  carregaFb();desenha();
+}
+</script>
+</body>
+</html>
